@@ -3,122 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Triangle</title>
+    <title>Triangle Simulator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #ffffff;
-        }
-        h1 {
+            background-color: #e6e6fa; /* Light purple background */
+            font-family: 'Times New Roman', serif;
             text-align: center;
+        }
+        canvas {
+            border: 1px solid black;
+        }
+        .controls {
             margin-top: 20px;
         }
-        .container {
-            width: 90%;
-            margin: auto;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-wrap: wrap;
-        }
         .slider-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .slider-container label {
-            color: #ffffff;
-            margin: 10px 0;
+            margin: 10px;
         }
         .slider {
             width: 200px;
         }
         .lock-checkbox {
-            margin-top: 5px;
-            color: #fff;
-        }
-        canvas {
-            border: 1px solid #fff;
-            margin-top: 20px;
-            background-color: #9D00FF;
-        }
-        .value-display {
-            color: #fff;
-            text-align: center;
             margin-top: 10px;
+        }
+        .step {
+            text-align: left;
+            margin: 10px;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result {
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>Interactive Triangle with Sliders</h1>
-    <div class="container">
+    <h1>Interactive Triangle Simulator</h1>
+    
+    <div class="controls">
         <div class="slider-container">
-            <label for="ab">AB</label>
-            <input type="range" id="ab" class="slider" min="50" max="300" value="150">
-            <input type="checkbox" id="lockAB" class="lock-checkbox"> Lock AB
-            <div id="abValue" class="value-display">AB = 150</div>
+            <label for="abSlider">Side AB: </label>
+            <input type="range" id="abSlider" class="slider" min="1" max="300" step="1" value="100">
+            <span id="abValue">100</span>
         </div>
         <div class="slider-container">
-            <label for="bc">BC</label>
-            <input type="range" id="bc" class="slider" min="50" max="300" value="150">
-            <input type="checkbox" id="lockBC" class="lock-checkbox"> Lock BC
-            <div id="bcValue" class="value-display">BC = 150</div>
+            <label for="bcSlider">Side BC: </label>
+            <input type="range" id="bcSlider" class="slider" min="1" max="300" step="1" value="100">
+            <span id="bcValue">100</span>
         </div>
         <div class="slider-container">
-            <label for="ac">AC</label>
-            <input type="range" id="ac" class="slider" min="50" max="300" value="150">
-            <input type="checkbox" id="lockAC" class="lock-checkbox"> Lock AC
-            <div id="acValue" class="value-display">AC = 150</div>
+            <label for="acSlider">Side AC: </label>
+            <input type="range" id="acSlider" class="slider" min="1" max="300" step="1" value="100">
+            <span id="acValue">100</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="angleASlider">Angle A (°): </label>
+            <input type="range" id="angleASlider" class="slider" min="0" max="180" step="1" value="60">
+            <span id="angleAValue">60</span>
         </div>
         <div class="slider-container">
-            <label for="angleA">Angle A</label>
-            <input type="range" id="angleA" class="slider" min="10" max="170" value="60">
-            <input type="checkbox" id="lockAngleA" class="lock-checkbox"> Lock Angle A
-            <div id="angleAValue" class="value-display">Angle A = 60°</div>
+            <label for="angleBSlider">Angle B (°): </label>
+            <input type="range" id="angleBSlider" class="slider" min="0" max="180" step="1" value="60">
+            <span id="angleBValue">60</span>
         </div>
         <div class="slider-container">
-            <label for="angleB">Angle B</label>
-            <input type="range" id="angleB" class="slider" min="10" max="170" value="60">
-            <input type="checkbox" id="lockAngleB" class="lock-checkbox"> Lock Angle B
-            <div id="angleBValue" class="value-display">Angle B = 60°</div>
+            <label for="angleCSlider">Angle C (°): </label>
+            <input type="range" id="angleCSlider" class="slider" min="0" max="180" step="1" value="60">
+            <span id="angleCValue">60</span>
         </div>
-        <div class="slider-container">
-            <label for="angleC">Angle C</label>
-            <input type="range" id="angleC" class="slider" min="10" max="170" value="60">
-            <input type="checkbox" id="lockAngleC" class="lock-checkbox"> Lock Angle C
-            <div id="angleCValue" class="value-display">Angle C = 60°</div>
+
+        <div class="lock-checkbox">
+            <label>Lock AB: <input type="checkbox" id="abLock" checked></label>
+            <label>Lock BC: <input type="checkbox" id="bcLock" checked></label>
+            <label>Lock AC: <input type="checkbox" id="acLock" checked></label>
+            <label>Lock Angle A: <input type="checkbox" id="angleALock" checked></label>
+            <label>Lock Angle B: <input type="checkbox" id="angleBLock" checked></label>
+            <label>Lock Angle C: <input type="checkbox" id="angleCLock" checked></label>
         </div>
     </div>
-    <canvas id="triangleCanvas" width="500" height="500"></canvas>
+
+    <div id="warning" class="warning"></div>
+
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <div class="results">
+        <div class="step" id="steps"></div>
+        <div class="result" id="perimeter">Perimeter: </div>
+        <div class="result" id="area">Area: </div>
+    </div>
 
     <script>
-        const abSlider = document.getElementById('ab');
-        const bcSlider = document.getElementById('bc');
-        const acSlider = document.getElementById('ac');
-        const angleASlider = document.getElementById('angleA');
-        const angleBSlider = document.getElementById('angleB');
-        const angleCSlider = document.getElementById('angleC');
-
-        const abLock = document.getElementById('lockAB');
-        const bcLock = document.getElementById('lockBC');
-        const acLock = document.getElementById('lockAC');
-        const angleALock = document.getElementById('lockAngleA');
-        const angleBLock = document.getElementById('lockAngleB');
-        const angleCLock = document.getElementById('lockAngleC');
-
-        const abValue = document.getElementById('abValue');
-        const bcValue = document.getElementById('bcValue');
-        const acValue = document.getElementById('acValue');
-        const angleAValue = document.getElementById('angleAValue');
-        const angleBValue = document.getElementById('angleBValue');
-        const angleCValue = document.getElementById('angleCValue');
-        
-        const canvas = document.getElementById('triangleCanvas');
+        // Get elements
+        const abSlider = document.getElementById('abSlider');
+        const bcSlider = document.getElementById('bcSlider');
+        const acSlider = document.getElementById('acSlider');
+        const angleASlider = document.getElementById('angleASlider');
+        const angleBSlider = document.getElementById('angleBSlider');
+        const angleCSlider = document.getElementById('angleCSlider');
+        const abLock = document.getElementById('abLock');
+        const bcLock = document.getElementById('bcLock');
+        const acLock = document.getElementById('acLock');
+        const angleALock = document.getElementById('angleALock');
+        const angleBLock = document.getElementById('angleBLock');
+        const angleCLock = document.getElementById('angleCLock');
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const warning = document.getElementById('warning');
+        const stepsElement = document.getElementById('steps');
+        const perimeterElement = document.getElementById('perimeter');
+        const areaElement = document.getElementById('area');
 
+        // Default values
         let ab = parseFloat(abSlider.value);
         let bc = parseFloat(bcSlider.value);
         let ac = parseFloat(acSlider.value);
@@ -127,31 +127,76 @@
         let angleC = parseFloat(angleCSlider.value);
 
         function calculate() {
-            // Update values from sliders
-            if (!abLock.checked) ab = parseFloat(abSlider.value);
-            if (!bcLock.checked) bc = parseFloat(bcSlider.value);
-            if (!acLock.checked) ac = parseFloat(acSlider.value);
-            if (!angleALock.checked) angleA = parseFloat(angleASlider.value);
-            if (!angleBLock.checked) angleB = parseFloat(angleBSlider.value);
-            if (!angleCLock.checked) angleC = parseFloat(angleCSlider.value);
+            // Update values
+            ab = parseFloat(abSlider.value);
+            bc = parseFloat(bcSlider.value);
+            ac = parseFloat(acSlider.value);
+            angleA = parseFloat(angleASlider.value);
+            angleB = parseFloat(angleBSlider.value);
+            angleC = parseFloat(angleCSlider.value);
 
-            // Display updated values
-            abValue.textContent = `AB = ${ab.toFixed(2)}`;
-            bcValue.textContent = `BC = ${bc.toFixed(2)}`;
-            acValue.textContent = `AC = ${ac.toFixed(2)}`;
-            angleAValue.textContent = `Angle A = ${angleA.toFixed(2)}°`;
-            angleBValue.textContent = `Angle B = ${angleB.toFixed(2)}°`;
-            angleCValue.textContent = `Angle C = ${angleC.toFixed(2)}°`;
+            // Check triangle validity
+            if (abLock.checked || bcLock.checked || acLock.checked) {
+                warning.innerText = '';  // Clear warning
+            } else {
+                warning.innerText = 'Warning: The triangle might not be valid if the sides are unlocked.';
+            }
 
-            // Calculate the triangle properties
-            const A = { x: 150, y: 350 };
-            const B = { x: A.x + ab, y: A.y };
-            const C = calculateThirdPoint(A, B, angleA, angleB);
+            // Calculations for triangle properties
+            let perimeter = ab + bc + ac;
+            let area = 0.5 * ab * bc * Math.sin(degreesToRadians(angleA)); // Using sine to calculate area
 
-            // Clear canvas
+            // Trigonometric values
+            let sinA = Math.sin(degreesToRadians(angleA));
+            let cosA = Math.cos(degreesToRadians(angleA));
+            let tanA = Math.tan(degreesToRadians(angleA));
+
+            let sinB = Math.sin(degreesToRadians(angleB));
+            let cosB = Math.cos(degreesToRadians(angleB));
+            let tanB = Math.tan(degreesToRadians(angleB));
+
+            let sinC = Math.sin(degreesToRadians(angleC));
+            let cosC = Math.cos(degreesToRadians(angleC));
+            let tanC = Math.tan(degreesToRadians(angleC));
+
+            // Show calculations
+            stepsElement.innerHTML = `
+                <strong>Calculations:</strong><br>
+                1. Pythagorean Theorem: <br>
+                If it's a right triangle, a² + b² = c². (Check if one angle is 90°)<br><br>
+                2. Angle Sum Property: <br>
+                A + B + C = 180°<br><br>
+                3. Triangle Inequality: <br>
+                a + b > c, b + c > a, c + a > b.<br><br>
+                4. Trigonometric Calculations: <br>
+                Sin A: ${sinA.toFixed(3)}<br>
+                Cos A: ${cosA.toFixed(3)}<br>
+                Tan A: ${tanA.toFixed(3)}<br><br>
+                Sin B: ${sinB.toFixed(3)}<br>
+                Cos B: ${cosB.toFixed(3)}<br>
+                Tan B: ${tanB.toFixed(3)}<br><br>
+                Sin C: ${sinC.toFixed(3)}<br>
+                Cos C: ${cosC.toFixed(3)}<br>
+                Tan C: ${tanC.toFixed(3)}<br><br>
+                5. Perimeter: ${perimeter.toFixed(2)}<br>
+                6. Area: ${area.toFixed(2)}<br>
+            `;
+
+            perimeterElement.innerText = `Perimeter: ${perimeter.toFixed(2)}`;
+            areaElement.innerText = `Area: ${area.toFixed(2)}`;
+
+            drawTriangle();
+        }
+
+        function drawTriangle() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Triangle
+            // Coordinates of the points (simplified for clarity)
+            const A = { x: 50, y: 50 };
+            const B = { x: A.x + ab, y: A.y };
+            const C = { x: A.x + bc, y: A.y + ac };
+
+            // Draw the triangle
             ctx.beginPath();
             ctx.moveTo(A.x, A.y);
             ctx.lineTo(B.x, B.y);
@@ -160,30 +205,13 @@
             ctx.stroke();
 
             // Labels
-            ctx.fillStyle = '#fff';
-            ctx.fillText('A', A.x - 10, A.y + 10);
-            ctx.fillText('B', B.x + 10, B.y + 10);
-            ctx.fillText('C', C.x, C.y - 10);
-
-            ctx.fillText(`AB = ${ab}`, (A.x + B.x) / 2, A.y - 10);
-            ctx.fillText(`BC = ${bc}`, (B.x + C.x) / 2, (B.y + C.y) / 2 - 10);
-            ctx.fillText(`AC = ${ac}`, (A.x + C.x) / 2, (A.y + C.y) / 2 + 10);
+            ctx.font = '16px Arial';
+            ctx.fillText('A', A.x, A.y);
+            ctx.fillText('B', B.x, B.y);
+            ctx.fillText('C', C.x, C.y);
         }
 
-        function calculateThirdPoint(A, B, angleA, angleB) {
-            const angleC = 180 - angleA - angleB;
-
-            const angleC_radians = (angleC * Math.PI) / 180;
-            const angleA_radians = (angleA * Math.PI) / 180;
-            const angleB_radians = (angleB * Math.PI) / 180;
-
-            const x = B.x + bc * Math.cos(angleC_radians);
-            const y = B.y + bc * Math.sin(angleC_radians);
-
-            return { x, y };
-        }
-
-        // Event Listeners
+        // Update when sliders change
         abSlider.addEventListener('input', calculate);
         bcSlider.addEventListener('input', calculate);
         acSlider.addEventListener('input', calculate);
@@ -191,15 +219,13 @@
         angleBSlider.addEventListener('input', calculate);
         angleCSlider.addEventListener('input', calculate);
 
-        abLock.addEventListener('change', calculate);
-        bcLock.addEventListener('change', calculate);
-        acLock.addEventListener('change', calculate);
-        angleALock.addEventListener('change', calculate);
-        angleBLock.addEventListener('change', calculate);
-        angleCLock.addEventListener('change', calculate);
-
-        // Initial Calculation
+        // Initial calculation
         calculate();
+
+        // Helper function to convert degrees to radians
+        function degreesToRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
     </script>
 </body>
 </html>
