@@ -7,132 +7,157 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        .controls {
             margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
         }
-        .slider {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 10px;
+        h1 {
+            text-align: center;
         }
-        input[type="range"] {
-            width: 200px;
-            margin: 10px 0;
+        .slider-container {
+            margin-bottom: 20px;
         }
-        canvas {
-            border: 1px solid #000;
-            margin: 20px auto;
-            background-color: white;
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
         }
         .output {
-            background: #ffffff;
-            border: 1px solid #cccccc;
-            padding: 10px;
-            margin: 20px auto;
-            max-width: 400px;
-            text-align: left;
+            margin-top: 20px;
+        }
+        .output p {
+            margin: 5px 0;
+        }
+        .invalid {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            margin-left: 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        button.locked {
+            background-color: grey;
         }
     </style>
 </head>
 <body>
     <h1>Triangle Simulator</h1>
-    <canvas id="triangleCanvas" width="500" height="500"></canvas>
-    
-    <div class="controls">
-        <div class="slider">
-            <label>Side A: <span id="sideAValue">5</span></label>
-            <input type="range" id="sideA" min="1" max="100" value="5">
-        </div>
-        <div class="slider">
-            <label>Side B: <span id="sideBValue">5</span></label>
-            <input type="range" id="sideB" min="1" max="100" value="5">
-        </div>
-        <div class="slider">
-            <label>Angle C: <span id="angleCValue">90</span>°</label>
-            <input type="range" id="angleC" min="1" max="179" value="90">
-        </div>
+
+    <!-- Sliders for side lengths -->
+    <div class="slider-container">
+        <label>Side AB: <span id="abValue">50</span></label>
+        <input type="range" id="abSlider" min="1" max="200" value="50">
+        <button id="abLock" onclick="toggleLock('ab')">Unlock</button>
+    </div>
+    <div class="slider-container">
+        <label>Side BC: <span id="bcValue">50</span></label>
+        <input type="range" id="bcSlider" min="1" max="200" value="50">
+        <button id="bcLock" onclick="toggleLock('bc')">Unlock</button>
+    </div>
+    <div class="slider-container">
+        <label>Side AC: <span id="acValue">50</span></label>
+        <input type="range" id="acSlider" min="1" max="200" value="50">
+        <button id="acLock" onclick="toggleLock('ac')">Unlock</button>
     </div>
 
-    <div class="output" id="triangleDetails">
-        <!-- Output goes here -->
+    <!-- Sliders for angles -->
+    <div class="slider-container">
+        <label>Angle A: <span id="angleAValue">60</span>°</label>
+        <input type="range" id="angleASlider" min="1" max="179" value="60">
+        <button id="angleALock" onclick="toggleLock('angleA')">Unlock</button>
+    </div>
+    <div class="slider-container">
+        <label>Angle B: <span id="angleBValue">60</span>°</label>
+        <input type="range" id="angleBSlider" min="1" max="179" value="60">
+        <button id="angleBLock" onclick="toggleLock('angleB')">Unlock</button>
+    </div>
+    <div class="slider-container">
+        <label>Angle C: <span id="angleCValue">60</span>°</label>
+        <input type="range" id="angleCSlider" min="1" max="179" value="60">
+        <button id="angleCLock" onclick="toggleLock('angleC')">Unlock</button>
+    </div>
+
+    <!-- Output -->
+    <div class="output" id="output">
+        <p id="triangleStatus"></p>
+        <p>Area: <span id="area"></span></p>
+        <p>Perimeter: <span id="perimeter"></span></p>
+        <p>Pythagorean Theorem Check: <span id="pythagorean"></span></p>
+        <p>Angle Sum Property: <span id="angleSum"></span></p>
+        <p>Triangle Inequality Check: <span id="triangleInequality"></span></p>
+        <p>sin(A): <span id="sinA"></span></p>
+        <p>cos(A): <span id="cosA"></span></p>
+        <p>tan(A): <span id="tanA"></span></p>
     </div>
 
     <script>
-        const sideASlider = document.getElementById("sideA");
-        const sideBSlider = document.getElementById("sideB");
-        const angleCSlider = document.getElementById("angleC");
+        const abSlider = document.getElementById('abSlider');
+        const bcSlider = document.getElementById('bcSlider');
+        const acSlider = document.getElementById('acSlider');
+        const angleASlider = document.getElementById('angleASlider');
+        const angleBSlider = document.getElementById('angleBSlider');
+        const angleCSlider = document.getElementById('angleCSlider');
 
-        const sideAValue = document.getElementById("sideAValue");
-        const sideBValue = document.getElementById("sideBValue");
-        const angleCValue = document.getElementById("angleCValue");
+        const locks = { ab: false, bc: false, ac: false, angleA: false, angleB: false, angleC: false };
 
-        const canvas = document.getElementById("triangleCanvas");
-        const ctx = canvas.getContext("2d");
-
-        const details = document.getElementById("triangleDetails");
-
-        function updateTriangle() {
-            const a = +sideASlider.value;
-            const b = +sideBSlider.value;
-            const C = +angleCSlider.value;
-
-            sideAValue.textContent = a;
-            sideBValue.textContent = b;
-            angleCValue.textContent = C;
-
-            // Calculate third side and angles using the law of cosines/sines
-            const C_rad = (C * Math.PI) / 180;
-            const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(C_rad));
-            const A_rad = Math.asin((a * Math.sin(C_rad)) / c);
-            const B_rad = Math.PI - A_rad - C_rad;
-            const A = (A_rad * 180) / Math.PI;
-            const B = (B_rad * 180) / Math.PI;
-
-            const area = 0.5 * a * b * Math.sin(C_rad);
-            const perimeter = a + b + c;
-
-            const sinC = Math.sin(C_rad).toFixed(3);
-            const cosC = Math.cos(C_rad).toFixed(3);
-            const tanC = (Math.tan(C_rad) || "undefined").toFixed(3);
-
-            // Drawing the triangle
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const scale = 300 / (a + b + c);
-            const ax = 50, ay = 400;
-            const bx = ax + a * scale, by = ay;
-            const cx = bx + c * scale * Math.cos(B_rad), cy = by - c * scale * Math.sin(B_rad);
-            
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(bx, by);
-            ctx.lineTo(cx, cy);
-            ctx.closePath();
-            ctx.stroke();
-
-            // Output details
-            details.innerHTML = `
-                <b>Triangle Details:</b><br>
-                Right Angled: ${Math.abs(C - 90) < 0.01 ? "Yes" : "No"}<br>
-                Symmetrical: No<br>
-                Area: ${area.toFixed(2)}<br>
-                Perimeter: ${perimeter.toFixed(2)}<br>
-                sin(C): ${sinC}, cos(C): ${cosC}, tan(C): ${tanC}<br>
-                Pythagorean Check: ${
-                    Math.abs(a * a + b * b - c * c) < 0.01 ? "Valid" : "Not Applicable"
-                }
-            `;
+        function toggleLock(id) {
+            const lockButton = document.getElementById(`${id}Lock`);
+            locks[id] = !locks[id];
+            lockButton.textContent = locks[id] ? 'Locked' : 'Unlock';
+            lockButton.classList.toggle('locked');
         }
 
-        sideASlider.addEventListener("input", updateTriangle);
-        sideBSlider.addEventListener("input", updateTriangle);
-        angleCSlider.addEventListener("input", updateTriangle);
+        function calculate() {
+            const ab = Number(abSlider.value);
+            const bc = Number(bcSlider.value);
+            const ac = Number(acSlider.value);
+            const angleA = Number(angleASlider.value);
+            const angleB = Number(angleBSlider.value);
+            const angleC = Number(angleCSlider.value);
 
-        updateTriangle();
+            const isTriangle = ab + bc > ac && ab + ac > bc && bc + ac > ab && angleA + angleB + angleC === 180;
+
+            document.getElementById('abValue').textContent = ab;
+            document.getElementById('bcValue').textContent = bc;
+            document.getElementById('acValue').textContent = ac;
+            document.getElementById('angleAValue').textContent = angleA;
+            document.getElementById('angleBValue').textContent = angleB;
+            document.getElementById('angleCValue').textContent = angleC;
+
+            const area = 0.5 * ab * bc * Math.sin((Math.PI / 180) * angleC);
+            const perimeter = ab + bc + ac;
+
+            const sinA = (Math.sin((Math.PI / 180) * angleA)).toFixed(3);
+            const cosA = (Math.cos((Math.PI / 180) * angleA)).toFixed(3);
+            const tanA = (Math.tan((Math.PI / 180) * angleA)).toFixed(3);
+
+            document.getElementById('area').textContent = isTriangle ? area.toFixed(2) : 'N/A';
+            document.getElementById('perimeter').textContent = isTriangle ? perimeter.toFixed(2) : 'N/A';
+            document.getElementById('pythagorean').textContent = (Math.pow(ab, 2) + Math.pow(bc, 2) === Math.pow(ac, 2)) ? 'Valid' : 'Invalid';
+            document.getElementById('angleSum').textContent = angleA + angleB + angleC === 180 ? 'Valid' : 'Invalid';
+            document.getElementById('triangleInequality').textContent = isTriangle ? 'Valid' : 'Invalid';
+
+            document.getElementById('sinA').textContent = isTriangle ? sinA : 'N/A';
+            document.getElementById('cosA').textContent = isTriangle ? cosA : 'N/A';
+            document.getElementById('tanA').textContent = isTriangle ? tanA : 'N/A';
+
+            const status = document.getElementById('triangleStatus');
+            status.textContent = isTriangle ? 'Valid Triangle' : 'INVALID TRIANGLE';
+            status.className = isTriangle ? '' : 'invalid';
+        }
+
+        abSlider.addEventListener('input', calculate);
+        bcSlider.addEventListener('input', calculate);
+        acSlider.addEventListener('input', calculate);
+        angleASlider.addEventListener('input', calculate);
+        angleBSlider.addEventListener('input', calculate);
+        angleCSlider.addEventListener('input', calculate);
+
+        calculate();
     </script>
 </body>
 </html>
