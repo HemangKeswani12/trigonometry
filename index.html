@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Triangle Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #000;
+            color: #fff;
         }
         h1 {
             text-align: center;
+            margin-bottom: 20px;
         }
         .slider-container {
             margin-bottom: 20px;
@@ -41,6 +44,11 @@
         }
         button.locked {
             background-color: grey;
+        }
+        canvas {
+            display: block;
+            margin: 30px auto;
+            background: #222;
         }
     </style>
 </head>
@@ -80,6 +88,9 @@
         <input type="range" id="angleCSlider" min="1" max="179" value="60">
         <button id="angleCLock" onclick="toggleLock('angleC')">Unlock</button>
     </div>
+
+    <!-- Canvas for Triangle Visualization -->
+    <canvas id="triangleCanvas" width="500" height="400"></canvas>
 
     <!-- Output -->
     <div class="output" id="output">
@@ -148,6 +159,37 @@
             const status = document.getElementById('triangleStatus');
             status.textContent = isTriangle ? 'Valid Triangle' : 'INVALID TRIANGLE';
             status.className = isTriangle ? '' : 'invalid';
+
+            drawTriangle(ab, bc, ac);
+        }
+
+        function drawTriangle(ab, bc, ac) {
+            const canvas = document.getElementById('triangleCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 2; // Scaling factor for better visualization
+            const A = { x: 100, y: 300 }; // Starting point A
+            const B = { x: A.x + ab * scale, y: A.y }; // Horizontal line AB
+            const C = { x: A.x + (bc * scale) / 2, y: A.y - ac * scale }; // Third point
+
+            ctx.strokeStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#fff';
+            ctx.fillText('A', A.x - 10, A.y + 10);
+            ctx.fillText('B', B.x + 10, B.y + 10);
+            ctx.fillText('C', C.x, C.y - 10);
+
+            ctx.fillText(`AB = ${ab}`, (A.x + B.x) / 2, A.y - 10);
+            ctx.fillText(`BC = ${bc}`, (B.x + C.x) / 2, (B.y + C.y) / 2 - 10);
+            ctx.fillText(`AC = ${ac}`, (A.x + C.x) / 2, (A.y + C.y) / 2 + 10);
         }
 
         abSlider.addEventListener('input', calculate);
