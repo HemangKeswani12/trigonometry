@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangle Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .controls {
+            margin: 20px;
+        }
+        .slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+        }
+        input[type="range"] {
+            width: 200px;
+            margin: 10px 0;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin: 20px auto;
+            background-color: white;
+        }
+        .output {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            padding: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Triangle Simulator</h1>
+    <canvas id="triangleCanvas" width="500" height="500"></canvas>
+    
+    <div class="controls">
+        <div class="slider">
+            <label>Side A: <span id="sideAValue">5</span></label>
+            <input type="range" id="sideA" min="1" max="100" value="5">
+        </div>
+        <div class="slider">
+            <label>Side B: <span id="sideBValue">5</span></label>
+            <input type="range" id="sideB" min="1" max="100" value="5">
+        </div>
+        <div class="slider">
+            <label>Angle C: <span id="angleCValue">90</span>°</label>
+            <input type="range" id="angleC" min="1" max="179" value="90">
+        </div>
+    </div>
+
+    <div class="output" id="triangleDetails">
+        <!-- Output goes here -->
+    </div>
+
+    <script>
+        const sideASlider = document.getElementById("sideA");
+        const sideBSlider = document.getElementById("sideB");
+        const angleCSlider = document.getElementById("angleC");
+
+        const sideAValue = document.getElementById("sideAValue");
+        const sideBValue = document.getElementById("sideBValue");
+        const angleCValue = document.getElementById("angleCValue");
+
+        const canvas = document.getElementById("triangleCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const details = document.getElementById("triangleDetails");
+
+        function updateTriangle() {
+            const a = +sideASlider.value;
+            const b = +sideBSlider.value;
+            const C = +angleCSlider.value;
+
+            sideAValue.textContent = a;
+            sideBValue.textContent = b;
+            angleCValue.textContent = C;
+
+            // Calculate third side and angles using the law of cosines/sines
+            const C_rad = (C * Math.PI) / 180;
+            const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(C_rad));
+            const A_rad = Math.asin((a * Math.sin(C_rad)) / c);
+            const B_rad = Math.PI - A_rad - C_rad;
+            const A = (A_rad * 180) / Math.PI;
+            const B = (B_rad * 180) / Math.PI;
+
+            const area = 0.5 * a * b * Math.sin(C_rad);
+            const perimeter = a + b + c;
+
+            const sinC = Math.sin(C_rad).toFixed(3);
+            const cosC = Math.cos(C_rad).toFixed(3);
+            const tanC = (Math.tan(C_rad) || "undefined").toFixed(3);
+
+            // Drawing the triangle
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const scale = 300 / (a + b + c);
+            const ax = 50, ay = 400;
+            const bx = ax + a * scale, by = ay;
+            const cx = bx + c * scale * Math.cos(B_rad), cy = by - c * scale * Math.sin(B_rad);
+            
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
+            ctx.lineTo(cx, cy);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Output details
+            details.innerHTML = `
+                <b>Triangle Details:</b><br>
+                Right Angled: ${Math.abs(C - 90) < 0.01 ? "Yes" : "No"}<br>
+                Symmetrical: No<br>
+                Area: ${area.toFixed(2)}<br>
+                Perimeter: ${perimeter.toFixed(2)}<br>
+                sin(C): ${sinC}, cos(C): ${cosC}, tan(C): ${tanC}<br>
+                Pythagorean Check: ${
+                    Math.abs(a * a + b * b - c * c) < 0.01 ? "Valid" : "Not Applicable"
+                }
+            `;
+        }
+
+        sideASlider.addEventListener("input", updateTriangle);
+        sideBSlider.addEventListener("input", updateTriangle);
+        angleCSlider.addEventListener("input", updateTriangle);
+
+        updateTriangle();
+    </script>
+</body>
+</html>
